@@ -1,0 +1,6 @@
+llama_index
+langchain
+gradio
+Scrapy
+crochet
+nltk
