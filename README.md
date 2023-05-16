@@ -1,6 +1,20 @@
 # 📞 Talktoit
 Talktoit is a way to launch an Web interface and talk to your data using a LLM. As of now, you can supply a URL and you API key, build your index and start cooking in less than 5 min.
 
+# 🤔 Why build this ?
+The most obvious and honest answer is for the heck of it. To have fun and tinker with these fascinating technological bricks.
+
+A more dreamy and ambtious anwser is to have something that lowers the entry barrier and makes it easier to play in the LLM ecosystem through a nice and simple UI.
+
+# What next ?
+Some ideas that come to mind regarding the evolution of this extermely modest project are
+- More elaborate scraping. Scrapy is wonderfully rich and can be leveraged more.
+- Use other sources of data in step 1 instead of a website: 
+    - Youtube/audio with a transcripe API or Model (Whisper ?)
+    - PDFs
+    - Other text sources?
+- use different LLMs in step 2, maybe llama.cpp to enable offline mode without GPU?
+- Conversation history using LangChain
 
 # 🧐 Demo
 
