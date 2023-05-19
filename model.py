@@ -1,4 +1,3 @@
-import glob
 import logging
 import os
 import sys
@@ -17,14 +16,6 @@ logging.getLogger().addHandler(logging.StreamHandler(stream=sys.stdout))
 
 logger = logging.getLogger(__name__)
 
-
-def get_indexable_data():
-    data_path = Path(conf.DATA_DIR)
-    return [
-        f.name
-        for f in os.scandir(data_path)
-        if f.is_dir() and len(glob.glob1(f, "*.html")) > 2
-    ]
 
 
 class Model:

@@ -4,7 +4,6 @@ import re
 from pathlib import Path
 
 import w3lib.html
-
 # https://stackoverflow.com/a/47581199/11674997
 from crochet import setup, wait_for
 from scrapy.crawler import CrawlerRunner
@@ -18,9 +17,6 @@ import conf
 from ..items import ScrapyCrawlerItem
 
 setup()
-
-
-# DATA_DIR = "./pages"
 
 
 class MySpider(CrawlSpider):

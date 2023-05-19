@@ -162,5 +162,5 @@ cython_debug/
 
 .DS_Store
 index_storage/*
-pages/*
+data_storage/*
 !.gitignore

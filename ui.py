@@ -1,9 +1,13 @@
+import datetime
 import logging
+import tempfile
 import time
+from typing import List
 
 import gradio as gr
 
-from model import Model, get_indexable_data
+from data import get_indexable_data, upload_files
+from model import Model
 from scrapy_crawler import domain_is_scrapped, start_crawler
 
 logger = logging.getLogger(__name__)
@@ -17,32 +21,54 @@ with gr.Blocks(theme=gr.themes.Soft()) as demo:
     )
     gr.Markdown(
         """
-        ##  1️⃣ Scrape a website by simply entering its URL   
+        ##  1️⃣ Get your data
         
         """
     )
-    with gr.Accordion("👉", open=False):
-        gr.Markdown(
+    with gr.Accordion(
+        "You can get your data in any of the following ways: 👉", open=False
+    ):
+        with gr.Accordion(
+            "Scrape a website by simply entering its URL   👉", open=False
+        ):
+            gr.Markdown(
+                """
+            #### Build an index by scraping a domain starting at `start_url` and crawling up to ~ `max_pages` pages.
+            s
+            ###### The scraper can slightly exceed `max_pages` because the shutdown is graceful when the limit is reached.
             """
-        #### Build an index by scraping a domain starting at `start_url` and crawling up to ~ `max_pages` pages.
-        s
-        ###### The scraper can slightly exceed `max_pages` because the shutdown is graceful when the limit is reached.
-        """
-        )
-        with gr.Box():
-            domain_index = gr.Textbox(
-                label="Domain", placeholder="example.com", max_lines=1
             )
-            start_url = gr.Textbox(
-                "",
-                label="Start url",
-                placeholder="https://www.example.com",
-                max_lines=1,
-            )
-            max_pages = gr.Number(5, label="~ Max pages")
+            with gr.Box():
+                domain_index = gr.Textbox(
+                    label="Domain", placeholder="example.com", max_lines=1
+                )
+                start_url = gr.Textbox(
+                    "",
+                    label="Start url",
+                    placeholder="https://www.example.com",
+                    max_lines=1,
+                )
+                max_pages = gr.Number(5, label="~ Max pages")
 
-            scrap_status = gr.Textbox(label="Scrape Status")  # , visible=False)
-            scrap_btn = gr.Button("Scrape!")
+                scrap_status = gr.Textbox(label="Scrape Status")  # , visible=False)
+                scrap_btn = gr.Button("Scrape!")
+
+        with gr.Accordion(
+            "Upload your files. The supported formats are .pdf, .docx or .txt 👉",
+            open=False,
+        ):
+            with gr.Box():
+                data_label = gr.Textbox(
+                    label="Data Label",
+                    value=lambda: f"my_data_{datetime.datetime.now().strftime('%m-%d-%Y__%H:%M:%S')}",
+                    max_lines=1,
+                )
+                file_upload = gr.File()
+                upload_button = gr.UploadButton(
+                    "Click to Upload a File",
+                    file_types=[".docx", ".pdf", ".txt"],
+                    file_count="multiple",
+                )
 
     gr.Markdown(
         """
@@ -51,7 +77,7 @@ with gr.Blocks(theme=gr.themes.Soft()) as demo:
         """
     )
 
-    with gr.Accordion("👉", open=False):
+    with gr.Accordion("Index is built using the previous step's data👉", open=False):
         with gr.Box():
             dir_to_index_dropdown = gr.Dropdown(
                 get_indexable_data(),
@@ -68,7 +94,7 @@ with gr.Blocks(theme=gr.themes.Soft()) as demo:
         
         """
     )
-    with gr.Accordion("👉", open=False):
+    with gr.Accordion("Pick an index and chat with your data 👉", open=False):
         with gr.Box():
             # domain_chat = gr.Textbox(label="Domain", placeholder="example.com",max_lines=1)
             available_indices = Model.get_available_indices()
@@ -99,8 +125,6 @@ with gr.Blocks(theme=gr.themes.Soft()) as demo:
 
     def create_index(dir_to_index_dropdown, progress=gr.Progress()):
         model = Model(dir_to_index_dropdown)
-        # PROGRESS BAR NOT WORKING ?????
-        print("starting progress")
         progress(0, desc="Starting...")
         time.sleep(0.5)
         progress(0.1, desc="inprogress...")
@@ -152,6 +176,20 @@ with gr.Blocks(theme=gr.themes.Soft()) as demo:
                 scrap_status: gr.update(value=result),
                 dir_to_index_dropdown: gr.update(choices=get_indexable_data()),
             }
+
+    def upload_files_ui(files: List[tempfile._TemporaryFileWrapper], data_label: str):
+        file_paths = upload_files(files, data_label)
+        dir_to_index_dropdown.choices = get_indexable_data()
+        return {
+            file_upload: gr.update(value=file_paths),
+            dir_to_index_dropdown: gr.update(choices=get_indexable_data()),
+        }
+
+    upload_button.upload(
+        upload_files_ui,
+        [upload_button, data_label],
+        [file_upload, dir_to_index_dropdown],
+    )
 
     scrap_btn.click(
         scrape,
